@@ -5,8 +5,6 @@ from config.config import Config
 class BinanceService:
     def __init__(self):
         self.exchange = ccxt.binance({
-            'apiKey': Config.BINANCE_API_KEY,
-            'secret': Config.BINANCE_API_SECRET,
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'spot'

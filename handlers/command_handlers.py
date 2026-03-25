@@ -141,32 +141,52 @@ async def auto_off_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_message.reply_text("❌ Auto signal DIMATIKAN")
 
 # ================= SIGNAL =================
-async def price_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.effective_message.reply_text("Contoh: /price BTC/USDT")
+        await update.effective_message.reply_text("Contoh: /signal BTC/USDT")
         return
 
     raw_symbol = context.args[0].upper()
 
+    # FIX FORMAT SYMBOL
     if "/" not in raw_symbol:
         symbol = raw_symbol[:-4] + "/" + raw_symbol[-4:]
     else:
         symbol = raw_symbol
 
+    timeframe = context.args[1] if len(context.args) > 1 else '5m'
+
+    await update.effective_message.reply_text(f"Analisa {symbol}... ⏳")
+
     try:
-        df = await binance.fetch_ohlcv(symbol, timeframe="1m")
+        df = await binance.fetch_ohlcv(symbol, timeframe=timeframe)
 
         if df is None or df.empty:
-            await update.effective_message.reply_text("❌ Pair tidak valid")
+            await update.effective_message.reply_text("❌ Data kosong / pair tidak valid")
             return
 
+        df = analysis.calculate_indicators(df)
+
+        signal, confidence = analysis.generate_signal(df)
         price = df.iloc[-1]['close']
 
-        await update.effective_message.reply_text(
-            f"💰 Harga {symbol}: `{price}`",
-            parse_mode='Markdown'
+        indicators = {
+            'rsi': df.iloc[-1].get('rsi'),
+            'ma50': df.iloc[-1].get('ma50'),
+            'ma200': df.iloc[-1].get('ma200'),
+            'macd': df.iloc[-1].get('macd'),
+        }
+
+        report = Formatter.format_signal_message(
+            symbol,
+            price,
+            signal,
+            indicators,
+            confidence
         )
+
+        await update.effective_message.reply_text(report, parse_mode='Markdown')
 
     except Exception as e:
         logger.error(e)
-        await update.effective_message.reply_text("Error ambil harga")
+        await update.effective_message.reply_text(f"❌ ERROR: {e}")

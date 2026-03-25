@@ -8,6 +8,9 @@ class BinanceService:
             'apiKey': Config.BINANCE_API_KEY,
             'secret': Config.BINANCE_API_SECRET,
             'enableRateLimit': True,
+            'options': {
+                'defaultType': 'spot'
+            }
         })
         self.markets_loaded = False
 
@@ -21,8 +24,10 @@ class BinanceService:
                 print("MARKETS LOADED ✅")
 
             print("FETCH:", symbol)
+            print("AVAILABLE:", symbol in self.exchange.markets)
 
             ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+            
 
             if not ohlcv:
                 print("OHLCV EMPTY ❌")

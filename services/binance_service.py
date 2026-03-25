@@ -15,9 +15,8 @@ class BinanceService:
         self.markets_loaded = False
 
     async def fetch_ohlcv(self, symbol, timeframe='5m', limit=250):
-        """Fetch OHLCV data for a specific symbol using async support."""
         try:
-            # ===== LOAD MARKETS (WAJIB) =====
+        # ===== LOAD MARKETS =====
             if not self.markets_loaded:
                 await self.exchange.load_markets()
                 self.markets_loaded = True
@@ -26,18 +25,28 @@ class BinanceService:
             print("FETCH:", symbol)
             print("AVAILABLE:", symbol in self.exchange.markets)
 
-            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
-            
-
-            if not ohlcv:
-                print("OHLCV EMPTY ❌")
+        # 🔥 FIX UTAMA
+            if symbol not in self.exchange.markets:
+                print("❌ SYMBOL TIDAK ADA:", symbol)
                 return None
 
-            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+
+            if not ohlcv:
+                print("❌ OHLCV EMPTY")
+                return None
+
+            df = pd.DataFrame(
+                ohlcv,
+                columns=['timestamp', 'open', 'high', 'low', 'close', 'volume']
+            )
+
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+
+            print("DATA MASUK ✅", df.tail(1))
 
             return df
 
         except Exception as e:
-            print(f"Error fetching data for {symbol}: {e}")
+            print(f"❌ ERROR FETCH {symbol}: {e}")
             return None

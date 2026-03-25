@@ -148,25 +148,15 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     raw_symbol = context.args[0].upper()
 
-    # FIX FORMAT SYMBOL
+    # format symbol
     if "/" not in raw_symbol:
         symbol = raw_symbol[:-4] + "/" + raw_symbol[-4:]
     else:
         symbol = raw_symbol
 
-    if symbol not in binance.exchange.markets:
-        alt_symbol = symbol.replace("/", "")
-        print("TRY ALT:", alt_symbol)
-
-        if alt_symbol in binance.exchange.markets:
-            symbol = alt_symbol
-        else:
-            await update.effective_message.reply_text(f"❌ Symbol {symbol} tidak ditemukan")
-            return None
-
     timeframe = context.args[1] if len(context.args) > 1 else '5m'
 
-    await update.effective_message.reply_text(f"Analisa {symbol}... ⏳")
+    await update.effective_message.reply_text(f"Analisa {symbol} ({timeframe})... ⏳")
 
     try:
         df = await binance.fetch_ohlcv(symbol, timeframe=timeframe)

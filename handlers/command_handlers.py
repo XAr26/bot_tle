@@ -80,15 +80,15 @@ async def price_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.effective_message.reply_text("Contoh: /price BTC/USDT")
         return
-        
+
     symbol = context.args[0].upper().replace("/", "")
 
     try:
-        df = await binance.fetch_ohlcv(symbol, timeframe="1m")
+        df = await binance.fetch_ohlcv(symbol_slash, timeframe=timeframe)
 
-        if df is None:
-            await update.effective_message.reply_text("Pair tidak valid")
-            return
+        if df is None or df.empty:
+            print("TRY NO SLASH...")
+            df = await binance.fetch_ohlcv(symbol_noslash, timeframe=timeframe)
 
         price = df.iloc[-1]['close']
 
@@ -148,11 +148,11 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     raw_symbol = context.args[0].upper()
 
-    # support dua format
-    if "/" in raw_symbol:
-        symbol_api = raw_symbol.replace("/", "")
-    else:
-        symbol_api = raw_symbol
+    # AUTO FORMAT (SMART)
+    raw_symbol = context.args[0].upper()
+
+    symbol_slash = raw_symbol if "/" in raw_symbol else raw_symbol[:-4] + "/" + raw_symbol[-4:]
+    symbol_noslash = raw_symbol.replace("/", "")
 
     symbol = raw_symbol  # untuk display    
     timeframe = context.args[1] if len(context.args) > 1 else '5m'

@@ -5,13 +5,18 @@ class BinanceService:
     def __init__(self):
         self.exchange = ccxt.binance({
             'enableRateLimit': True,
+            'timeout': 30000,
             'options': {
                 'defaultType': 'spot'
             }
         })
+
+        # ✅ HARUS DI SINI
+        self.exchange.set_sandbox_mode(False)
+
         self.markets_loaded = False
 
-    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=250):
+    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=100):
         try:
             # load market sekali
             if not self.markets_loaded:
@@ -19,20 +24,27 @@ class BinanceService:
                 self.markets_loaded = True
                 print("MARKETS LOADED ✅")
 
+            print("=== DEBUG BINANCE ===")
             print("INPUT:", symbol)
+
+            print("MARKETS COUNT:", len(self.exchange.markets))
 
             # AUTO FIX SYMBOL
             if symbol not in self.exchange.markets:
                 alt = symbol.replace("/", "")
                 for m in self.exchange.markets:
                     if alt == m.replace("/", ""):
-                        print("FIXED:", m)
+                        print("FIXED SYMBOL:", m)
                         symbol = m
                         break
 
-            print("FINAL:", symbol)
+            print("FINAL SYMBOL:", symbol)
 
-            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+            ohlcv = await self.exchange.fetch_ohlcv(
+                symbol,
+                timeframe=timeframe,
+                limit=limit
+            )
 
             if not ohlcv:
                 print("EMPTY DATA ❌")

@@ -163,7 +163,6 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         # ===== DEBUG SYMBOL =====
         print("SYMBOL INPUT:", raw_symbol)
-        print("SYMBOL API:", symbol_api)
 
         # ===== AMBIL DATA =====
         df = await binance.fetch_ohlcv(symbol_api, timeframe=timeframe)

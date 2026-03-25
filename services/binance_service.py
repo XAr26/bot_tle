@@ -14,7 +14,7 @@ class BinanceService:
         })
         self.markets_loaded = False
 
-    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=250):
+    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=100):
         try:
         # ===== LOAD MARKETS =====
             if not self.markets_loaded:

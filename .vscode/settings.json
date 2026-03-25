@@ -1,0 +1,5 @@
+{
+    "files.exclude": {
+        "BOT_TOKEN": true
+    }
+}

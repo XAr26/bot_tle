@@ -1,0 +1,8 @@
+python-telegram-bot
+ccxt
+pandas
+ta
+apscheduler
+python-dotenv
+matplotlib
+mplfinance

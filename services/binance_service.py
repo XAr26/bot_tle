@@ -12,39 +12,39 @@ class BinanceService:
         })
         self.markets_loaded = False
 
-    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=100):
-        try:
-        # ===== LOAD MARKETS =====
-            if not self.markets_loaded:
-                await self.exchange.load_markets()
-                self.markets_loaded = True
-                print("MARKETS LOADED ✅")
+    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=250):
+    try:
+        if not self.markets_loaded:
+            await self.exchange.load_markets()
+            self.markets_loaded = True
+            print("MARKETS LOADED ✅")
 
-            print("FETCH:", symbol)
-            print("AVAILABLE:", symbol in self.exchange.markets)
+        print("INPUT SYMBOL:", symbol)
 
-        # 🔥 FIX UTAMA
-            if symbol not in binance.exchange.markets:
-                print("❌ SYMBOL TIDAK ADA:", symbol)
-                return None
+        # AUTO FIX SYMBOL
+        if symbol not in self.exchange.markets:
+            alt = symbol.replace("/", "")
+            for market in self.exchange.markets:
+                if alt == market.replace("/", ""):
+                    print("FIXED SYMBOL:", market)
+                    symbol = market
+                    break
 
-            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+        print("FINAL SYMBOL:", symbol)
 
-            if not ohlcv:
-                print("❌ OHLCV EMPTY")
-                return None
+        ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
 
-            df = pd.DataFrame(
-                ohlcv,
-                columns=['timestamp', 'open', 'high', 'low', 'close', 'volume']
-            )
-
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-
-            print("DATA MASUK ✅", df.tail(1))
-
-            return df
-
-        except Exception as e:
-            print(f"❌ ERROR FETCH {symbol}: {e}")
+        if not ohlcv:
+            print("OHLCV EMPTY ❌")
             return None
+
+        df = pd.DataFrame(ohlcv, columns=['timestamp','open','high','low','close','volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+
+        print("DATA OK ✅", len(df))
+
+        return df
+
+    except Exception as e:
+        print("ERROR FETCH:", e)
+        return None

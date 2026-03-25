@@ -150,38 +150,54 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     symbol = context.args[0].upper()
     timeframe = context.args[1] if len(context.args) > 1 else '5m'
 
-    await update.effective_message.reply_text(f"Analisa {symbol}... ⏳")
-
-    # generate chart
-    chart_file = generate_chart(df, symbol)
-
-    # kirim gambar
-    with open(chart_file, 'rb') as photo:
-        await update.effective_message.reply_photo(photo)
-
-    # kirim text signal
-    await update.effective_message.reply_text(
-        report,
-        parse_mode='Markdown'
-    )
+    await update.effective_message.reply_text(f"Analisa {symbol} ({timeframe})... ⏳")
 
     try:
+        # ===== AMBIL DATA =====
         df = await binance.fetch_ohlcv(symbol, timeframe=timeframe)
 
-        if df is None:
-            await update.effective_message.reply_text("Pair tidak valid")
+        if df is None or df.empty:
+            await update.effective_message.reply_text("❌ Data kosong / pair tidak valid")
             return
 
+        # ===== HITUNG INDIKATOR =====
         df = analysis.calculate_indicators(df)
-        signal = analysis.generate_signal(df)
+
+        # ===== SIGNAL =====
+        signal, confidence = analysis.generate_signal(df)
         price = df.iloc[-1]['close']
 
+        indicators = {
+            'rsi': df.iloc[-1].get('rsi'),
+            'ma50': df.iloc[-1].get('ma50'),
+            'ma200': df.iloc[-1].get('ma200'),
+            'macd': df.iloc[-1].get('macd'),
+        }
+
+        # ===== FORMAT TEXT DULU =====
         report = Formatter.format_signal_message(
-            symbol, price, signal, {}
+            symbol,
+            price,
+            signal,
+            indicators,
+            confidence,
+            timeframe
         )
 
+        # ===== KIRIM TEXT DULU (AMAN) =====
         await update.effective_message.reply_text(report, parse_mode='Markdown')
 
+        # ===== BARU COBA CHART =====
+        try:
+            chart_file = generate_chart(df, symbol)
+
+            with open(chart_file, 'rb') as photo:
+                await update.effective_message.reply_photo(photo)
+
+        except Exception as chart_error:
+            logger.error(f"Chart Error: {chart_error}")
+            await update.effective_message.reply_text("⚠️ Chart gagal dibuat")
+
     except Exception as e:
-        logger.error(e)
-        await update.effective_message.reply_text("Error analisa")
+        logger.error(f"Signal Error: {e}")
+        await update.effective_message.reply_text(f"❌ ERROR: {e}")

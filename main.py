@@ -55,8 +55,8 @@ def main():
         app.run_polling()
 
     except Exception as e:
-        logger.critical(f"FATAL ERROR during bot startup: {e}")
-        sys.exit(1)
+      logger.critical(f"FATAL ERROR during bot startup: {e}")
+      sys.exit(1)
 
 if __name__ == "__main__":
     main()

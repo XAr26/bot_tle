@@ -80,8 +80,8 @@ async def price_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.effective_message.reply_text("Contoh: /price BTC/USDT")
         return
-
-    symbol = context.args[0].upper()
+        
+    symbol = context.args[0].upper().replace("/", "")
 
     try:
         df = await binance.fetch_ohlcv(symbol, timeframe="1m")
@@ -140,21 +140,40 @@ async def auto_off_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.effective_message.reply_text("❌ Auto signal DIMATIKAN")
 
-
 # ================= SIGNAL =================
 async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.effective_message.reply_text("Contoh: /signal BTC/USDT")
         return
 
-    symbol = context.args[0].upper()
+    raw_symbol = context.args[0].upper()
+
+    # support dua format
+    if "/" in raw_symbol:
+        symbol_api = raw_symbol.replace("/", "")
+    else:
+        symbol_api = raw_symbol
+
+    symbol = raw_symbol  # untuk display    
     timeframe = context.args[1] if len(context.args) > 1 else '5m'
 
     await update.effective_message.reply_text(f"Analisa {symbol} ({timeframe})... ⏳")
 
     try:
+        # ===== DEBUG SYMBOL =====
+        print("SYMBOL INPUT:", raw_symbol)
+        print("SYMBOL API:", symbol_api)
+
         # ===== AMBIL DATA =====
-        df = await binance.fetch_ohlcv(symbol, timeframe=timeframe)
+        df = await binance.fetch_ohlcv(symbol_api, timeframe=timeframe)
+
+        # ===== DEBUG DATA =====
+        if df is None:
+            print("DF NONE ❌")
+        elif df.empty:
+            print("DF EMPTY ❌")
+        else:
+            print("DF OK ✅")
 
         if df is None or df.empty:
             await update.effective_message.reply_text("❌ Data kosong / pair tidak valid")
@@ -174,7 +193,7 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'macd': df.iloc[-1].get('macd'),
         }
 
-        # ===== FORMAT TEXT DULU =====
+        # ===== FORMAT TEXT =====
         report = Formatter.format_signal_message(
             symbol,
             price,
@@ -184,10 +203,10 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             timeframe
         )
 
-        # ===== KIRIM TEXT DULU (AMAN) =====
+        # ===== KIRIM TEXT =====
         await update.effective_message.reply_text(report, parse_mode='Markdown')
 
-        # ===== BARU COBA CHART =====
+        # ===== CHART =====
         try:
             chart_file = generate_chart(df, symbol)
 

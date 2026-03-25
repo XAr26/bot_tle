@@ -147,6 +147,11 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     raw_symbol = context.args[0].upper()
 
+    if symbol_api not in binance.exchange.markets:
+        for s in binance.exchange.markets:
+            if "BTC" in s and "USDT" in s:
+                print("FOUND ALT:", s)
+
     # ===== FORMAT SYMBOL =====
     if "/" in raw_symbol:
         symbol_slash = raw_symbol

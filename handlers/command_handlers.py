@@ -154,11 +154,11 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         symbol = raw_symbol
 
-    if symbol not in self.exchange.markets:
+    if symbol not in binance.exchange.markets:
         alt_symbol = symbol.replace("/", "")
         print("TRY ALT:", alt_symbol)
 
-        if alt_symbol in self.exchange.markets:
+        if alt_symbol in binance.exchange.markets:
             symbol = alt_symbol
         else:
             await update.effective_message.reply_text(f"❌ Symbol {symbol} tidak ditemukan")

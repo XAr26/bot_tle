@@ -145,16 +145,17 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.effective_message.reply_text("Contoh: /signal BTC/USDT")
         return
-
     raw_symbol = context.args[0].upper()
 
-    # AUTO FORMAT (SMART)
-    raw_symbol = context.args[0].upper()
+    # ===== FORMAT SYMBOL =====
+    if "/" in raw_symbol:
+        symbol_slash = raw_symbol
+        symbol_noslash = raw_symbol.replace("/", "")
+    else:
+        symbol_noslash = raw_symbol
+        symbol_slash = raw_symbol[:-4] + "/" + raw_symbol[-4:]
 
-    symbol_slash = raw_symbol if "/" in raw_symbol else raw_symbol[:-4] + "/" + raw_symbol[-4:]
-    symbol_noslash = raw_symbol.replace("/", "")
-
-    symbol = raw_symbol  # untuk display    
+    symbol = raw_symbol  # untuk display  
     timeframe = context.args[1] if len(context.args) > 1 else '5m'
 
     await update.effective_message.reply_text(f"Analisa {symbol} ({timeframe})... ⏳")

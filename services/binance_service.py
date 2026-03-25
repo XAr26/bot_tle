@@ -26,7 +26,7 @@ class BinanceService:
             print("AVAILABLE:", symbol in self.exchange.markets)
 
         # 🔥 FIX UTAMA
-            if symbol not in self.exchange.markets:
+            if symbol not in binance.exchange.markets:
                 print("❌ SYMBOL TIDAK ADA:", symbol)
                 return None
 

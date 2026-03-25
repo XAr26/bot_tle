@@ -165,7 +165,7 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("SYMBOL INPUT:", raw_symbol)
 
         # ===== AMBIL DATA =====
-        df = await binance.fetch_ohlcv(symbol_api, timeframe=timeframe)
+        df = await binance.fetch_ohlcv(symbol_slash, timeframe=timeframe)
 
         # ===== DEBUG DATA =====
         if df is None:

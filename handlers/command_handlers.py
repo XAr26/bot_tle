@@ -141,87 +141,32 @@ async def auto_off_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_message.reply_text("❌ Auto signal DIMATIKAN")
 
 # ================= SIGNAL =================
-async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def price_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.effective_message.reply_text("Contoh: /signal BTC/USDT")
+        await update.effective_message.reply_text("Contoh: /price BTC/USDT")
         return
+
     raw_symbol = context.args[0].upper()
 
-    if symbol_api not in binance.exchange.markets:
-        for s in binance.exchange.markets:
-            if "BTC" in s and "USDT" in s:
-                print("FOUND ALT:", s)
-
-    # ===== FORMAT SYMBOL =====
-    if "/" in raw_symbol:
-        symbol_slash = raw_symbol
-        symbol_noslash = raw_symbol.replace("/", "")
+    if "/" not in raw_symbol:
+        symbol = raw_symbol[:-4] + "/" + raw_symbol[-4:]
     else:
-        symbol_noslash = raw_symbol
-        symbol_slash = raw_symbol[:-4] + "/" + raw_symbol[-4:]
-
-    symbol = raw_symbol  # untuk display  
-    timeframe = context.args[1] if len(context.args) > 1 else '5m'
-
-    await update.effective_message.reply_text(f"Analisa {symbol} ({timeframe})... ⏳")
+        symbol = raw_symbol
 
     try:
-        # ===== DEBUG SYMBOL =====
-        print("SYMBOL INPUT:", raw_symbol)
-
-        # ===== AMBIL DATA =====
-        df = await binance.fetch_ohlcv(symbol_slash, timeframe=timeframe)
-
-        # ===== DEBUG DATA =====
-        if df is None:
-            print("DF NONE ❌")
-        elif df.empty:
-            print("DF EMPTY ❌")
-        else:
-            print("DF OK ✅")
+        df = await binance.fetch_ohlcv(symbol, timeframe="1m")
 
         if df is None or df.empty:
-            await update.effective_message.reply_text("❌ Data kosong / pair tidak valid")
+            await update.effective_message.reply_text("❌ Pair tidak valid")
             return
 
-        # ===== HITUNG INDIKATOR =====
-        df = analysis.calculate_indicators(df)
-
-        # ===== SIGNAL =====
-        signal, confidence = analysis.generate_signal(df)
         price = df.iloc[-1]['close']
 
-        indicators = {
-            'rsi': df.iloc[-1].get('rsi'),
-            'ma50': df.iloc[-1].get('ma50'),
-            'ma200': df.iloc[-1].get('ma200'),
-            'macd': df.iloc[-1].get('macd'),
-        }
-
-        # ===== FORMAT TEXT =====
-        report = Formatter.format_signal_message(
-            symbol,
-            price,
-            signal,
-            indicators,
-            confidence,
-            timeframe
+        await update.effective_message.reply_text(
+            f"💰 Harga {symbol}: `{price}`",
+            parse_mode='Markdown'
         )
 
-        # ===== KIRIM TEXT =====
-        await update.effective_message.reply_text(report, parse_mode='Markdown')
-
-        # ===== CHART =====
-        try:
-            chart_file = generate_chart(df, symbol)
-
-            with open(chart_file, 'rb') as photo:
-                await update.effective_message.reply_photo(photo)
-
-        except Exception as chart_error:
-            logger.error(f"Chart Error: {chart_error}")
-            await update.effective_message.reply_text("⚠️ Chart gagal dibuat")
-
     except Exception as e:
-        logger.error(f"Signal Error: {e}")
-        await update.effective_message.reply_text(f"❌ ERROR: {e}")
+        logger.error(e)
+        await update.effective_message.reply_text("Error ambil harga")

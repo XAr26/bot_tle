@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from config.config import Config
-from services.binance_service import BinanceService
+from services.bybit_service import BybitService
 from services.analysis_service import AnalysisService
 from handlers.scheduler_handlers import send_auto_signals
 from utils.formatter import Formatter
@@ -11,7 +11,7 @@ from telegram.ext import CallbackQueryHandler
 from utils.chart import generate_chart
 
 logger = setup_logger()
-binance = BinanceService()
+bybit = BybitService()
 analysis = AnalysisService()
 
 
@@ -81,14 +81,23 @@ async def price_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.effective_message.reply_text("Contoh: /price BTC/USDT")
         return
 
-    symbol = context.args[0].upper().replace("/", "")
+    symbol = context.args[0].upper()
+    timeframe = '5m'
+    
+    # format symbol
+    if "/" not in symbol:
+        symbol_slash = symbol[:-4] + "/" + symbol[-4:]
+        symbol_noslash = symbol
+    else:
+        symbol_slash = symbol
+        symbol_noslash = symbol.replace("/", "")
 
     try:
-        df = await binance.fetch_ohlcv(symbol_slash, timeframe=timeframe)
+        df = await bybit.fetch_ohlcv(symbol_slash, timeframe=timeframe)
 
         if df is None or df.empty:
-            print("TRY NO SLASH...")
-            df = await binance.fetch_ohlcv(symbol_noslash, timeframe=timeframe)
+            logger.info("Retrying without slash...")
+            df = await bybit.fetch_ohlcv(symbol_noslash, timeframe=timeframe)
 
         price = df.iloc[-1]['close']
 
@@ -159,7 +168,7 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_message.reply_text(f"Analisa {symbol} ({timeframe})... ⏳")
 
     try:
-        df = await binance.fetch_ohlcv(symbol, timeframe=timeframe)
+        df = await bybit.fetch_ohlcv(symbol, timeframe=timeframe)
 
         if df is None or df.empty:
             await update.effective_message.reply_text("❌ Data kosong / pair tidak valid")

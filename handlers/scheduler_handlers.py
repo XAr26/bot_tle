@@ -1,11 +1,11 @@
-from services.binance_service import BinanceService
+from services.bybit_service import BybitService
 from services.analysis_service import AnalysisService
 from utils.formatter import Formatter
 from utils.logger import setup_logger
 from config.config import Config
 
 logger = setup_logger()
-binance = BinanceService()
+bybit = BybitService()
 analysis = AnalysisService()
 
 async def send_auto_signals(context):
@@ -23,7 +23,7 @@ async def send_auto_signals(context):
     logger.info("Running auto-signal update...")
 
     for symbol in Config.DEFAULT_PAIRS:
-        df = await binance.fetch_ohlcv(symbol)
+        df = await bybit.fetch_ohlcv(symbol)
         if df is not None:
             df = analysis.calculate_indicators(df)
             signal = analysis.generate_signal(df)

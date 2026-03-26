@@ -5,8 +5,6 @@ load_dotenv()
 
 class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN")
-    BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
-    BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET")
     BYBIT_API_KEY = os.getenv("BYBIT_API_KEY")
     BYBIT_API_SECRET = os.getenv("BYBIT_API_SECRET")
     DEFAULT_PAIRS = os.getenv("DEFAULT_PAIRS", "BTC/USDT,ETH/USDT,BNB/USDT").split(",")

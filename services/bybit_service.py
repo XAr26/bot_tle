@@ -8,9 +8,8 @@ class BybitService:
     def __init__(self):
         self.exchange = ccxt.bybit({
             'enableRateLimit': True,
-            'timeout': 30000,
             'options': {
-                'defaultType': 'spot'
+                'defaultType': 'linear'
             }
         })
         # Set sandbox mode to False for production

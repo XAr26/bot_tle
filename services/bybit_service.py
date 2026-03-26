@@ -16,7 +16,7 @@ class BybitService:
         self.exchange.set_sandbox_mode(False)
         self.markets_loaded = False
 
-    async def fetch_ohlcv(self, symbol, timeframe='5m', limit=100):
+    async def fetch_ohlcv(self, symbol, timeframe='1m', limit=100):
         try:
             # Load markets once
             if not self.markets_loaded:

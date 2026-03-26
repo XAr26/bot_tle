@@ -8,7 +8,6 @@ from utils.formatter import Formatter
 from utils.logger import setup_logger
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
-from utils.chart import generate_chart
 
 logger = setup_logger()
 bybit = BybitService()

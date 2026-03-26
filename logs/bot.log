@@ -7153,3 +7153,18 @@ telegram.error.Conflict: Conflict: terminated by other getUpdates request; make 
 task: <Task pending name='Application:8154596665:update_fetcher' coro=<Application._update_fetcher() running at C:\projeck\bot_tle\venv\Lib\site-packages\telegram\ext\_application.py:1233> wait_for=<Future pending cb=[Task.task_wakeup()]>>
 2026-03-25 11:41:24,299 - asyncio - ERROR - Task was destroyed but it is pending!
 task: <Task pending name='Updater:start_polling:polling_task' coro=<network_retry_loop() running at C:\projeck\bot_tle\venv\Lib\site-packages\telegram\ext\_utils\networkloop.py:200> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+2026-03-26 19:10:49,615 - CryptoBot - INFO - Bot starting up...
+2026-03-26 19:10:50,554 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getMe "HTTP/1.1 200 OK"
+2026-03-26 19:10:50,845 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/deleteWebhook "HTTP/1.1 200 OK"
+2026-03-26 19:10:50,851 - apscheduler.scheduler - INFO - Scheduler started
+2026-03-26 19:10:50,852 - telegram.ext.Application - INFO - Application started
+2026-03-26 19:10:51,767 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getUpdates "HTTP/1.1 200 OK"
+2026-03-26 19:10:52,239 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/sendMessage "HTTP/1.1 200 OK"
+2026-03-26 19:10:52,710 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/sendMessage "HTTP/1.1 200 OK"
+2026-03-26 19:10:53,159 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/sendMessage "HTTP/1.1 200 OK"
+2026-03-26 19:10:53,815 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/sendMessage "HTTP/1.1 200 OK"
+2026-03-26 19:11:02,041 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getUpdates "HTTP/1.1 200 OK"
+2026-03-26 19:11:13,270 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getUpdates "HTTP/1.1 200 OK"
+2026-03-26 19:11:23,508 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getUpdates "HTTP/1.1 200 OK"
+2026-03-26 19:11:33,757 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getUpdates "HTTP/1.1 200 OK"
+2026-03-26 19:11:44,091 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8154596665:AAHwj_2pkYroUq7OMXizzwcoBejHIckTNr0/getUpdates "HTTP/1.1 200 OK"

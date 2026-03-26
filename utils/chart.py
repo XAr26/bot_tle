@@ -1,4 +1,4 @@
-import mplfinance as mpf
+# import mplfinance as mpf
 import pandas as pd
 
 def generate_chart(df, symbol="BTCUSDT"):

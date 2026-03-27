@@ -30,13 +30,19 @@ class BybitService:
 
         self.exchange = ccxt.bybit(config)
         
-        # Override Bybit URL directly on the exchange object to bypass geo-blocking
-        # api.bytick.com is an alternative Bybit domain not blocked by CloudFront
-        self.exchange.urls['api'] = 'https://api.bytick.com'
-        logger.info(f"[BybitService] API URL set to: {self.exchange.urls['api']}")
+        # Override Bybit URL to bypass geo-blocking (CloudFront 403)
+        # Must replace each key individually since urls['api'] is a dict, not a string
+        if isinstance(self.exchange.urls.get('api'), dict):
+            for key in self.exchange.urls['api']:
+                if isinstance(self.exchange.urls['api'][key], str):
+                    self.exchange.urls['api'][key] = self.exchange.urls['api'][key].replace(
+                        'api.bybit.com', 'api.bytick.com'
+                    )
+        logger.info(f"[BybitService] api.bytick.com override applied ✅")
         
         self.exchange.set_sandbox_mode(False)
         self.markets_loaded = False
+
 
 
     async def fetch_ohlcv(self, symbol, timeframe='1m', limit=100):

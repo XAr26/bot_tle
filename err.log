@@ -1,0 +1,92 @@
+Traceback (most recent call last):
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\resolver.py", line 117, in resolve
+    resp = await self._resolver.getaddrinfo(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+aiodns.error.DNSError: (11, 'Could not contact DNS servers')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\connector.py", line 1562, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\connector.py", line 1178, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\connector.py", line 1209, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\resolver.py", line 126, in resolve
+    raise OSError(None, msg) from exc
+OSError: [Errno None] Could not contact DNS servers
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 241, in fetch
+    async with session_method(yarl.URL(url, encoded=True),
+               ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              data=encoded_body,
+                              ^^^^^^^^^^^^^^^^^^
+                              headers=request_headers,
+                              ^^^^^^^^^^^^^^^^^^^^^^^^
+                              timeout=(self.timeout / 1000),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              proxy=final_proxy) as response:
+                              ^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\client.py", line 1510, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\client.py", line 779, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\client.py", line 734, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\connector.py", line 672, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\connector.py", line 1239, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\aiohttp\connector.py", line 1568, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host api.bytick.com:443 ssl:default [Could not contact DNS servers]
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\projeck\bot_tle\debug_bybit.py", line 11, in run
+    await exchange.load_markets()
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 365, in load_markets
+    raise e
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 357, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 324, in load_markets_helper
+    markets = await self.fetch_markets(params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\bybit.py", line 1802, in fetch_markets
+    promises = await asyncio.gather(*promisesUnresolved)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\bybit.py", line 1829, in fetch_spot_markets
+    response = await self.publicGetV5MarketInstrumentsInfo(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 1028, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 1022, in fetch2
+    raise e
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 1012, in fetch2
+    return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projeck\bot_tle\.venv\Lib\site-packages\ccxt\async_support\base\exchange.py", line 281, in fetch
+    raise ExchangeNotAvailable(details) from e
+ccxt.base.errors.ExchangeNotAvailable: bybit GET https://api.bytick.com/v5/market/instruments-info?category=spot

@@ -1,87 +1,76 @@
-import ccxt.async_support as ccxt
+import aiohttp
 import pandas as pd
 from utils.logger import setup_logger
 import os
 
 logger = setup_logger()
 
+# Use alternative domain to bypass CloudFront geo-blocking on Railway US servers
+BYBIT_BASE_URL = os.getenv("BYBIT_BASE_URL", "https://api.bytick.com")
+
+# Timeframe mapping: human-readable -> Bybit API interval string
+TIMEFRAME_MAP = {
+    '1m': '1', '3m': '3', '5m': '5', '15m': '15', '30m': '30',
+    '1h': '60', '2h': '120', '4h': '240', '6h': '360', '12h': '720',
+    '1d': 'D', '1w': 'W', '1M': 'M'
+}
+
 class BybitService:
     def __init__(self):
-        config = {
-            'enableRateLimit': True,
-            'options': {
-                'defaultType': 'linear',
-            },
-            'headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        }
-        
-        # Check if proxy is set in environment (for Railway/US servers)
+        self.base_url = BYBIT_BASE_URL
         proxy_url = os.getenv("PROXY_URL")
-        if proxy_url:
-            config['proxies'] = {
-                'http': proxy_url,
-                'https': proxy_url
-            }
-            logger.info(f"[BybitService] ✅ Proxy DETECTED: {proxy_url[:30]}...")
-        else:
-            logger.warning("[BybitService] ⚠️ No PROXY_URL found. Using alternative domain (api.bytick.com).")
+        self.proxy = proxy_url if proxy_url else None
 
-        self.exchange = ccxt.bybit(config)
-        
-        # Override Bybit URL to bypass geo-blocking (CloudFront 403)
-        # Must replace each key individually since urls['api'] is a dict, not a string
-        if isinstance(self.exchange.urls.get('api'), dict):
-            for key in self.exchange.urls['api']:
-                if isinstance(self.exchange.urls['api'][key], str):
-                    self.exchange.urls['api'][key] = self.exchange.urls['api'][key].replace(
-                        'api.bybit.com', 'api.bytick.com'
-                    )
-        logger.info(f"[BybitService] api.bytick.com override applied ✅")
-        
-        self.exchange.set_sandbox_mode(False)
-        self.markets_loaded = False
+        if self.proxy:
+            logger.info(f"[BybitService] ✅ Proxy DETECTED: {self.proxy[:30]}...")
+        logger.info(f"[BybitService] Using base URL: {self.base_url}")
 
-
-
-    async def fetch_ohlcv(self, symbol, timeframe='1m', limit=100):
+    async def fetch_ohlcv(self, symbol: str, timeframe: str = '5m', limit: int = 100):
+        """Fetch OHLCV candles directly from Bybit V5 API using aiohttp."""
         try:
-            # Load markets once
-            if not self.markets_loaded:
-                logger.info(f"[BybitService] Loading markets for {symbol}...")
-                await self.exchange.load_markets()
-                self.markets_loaded = True
-                logger.info("[BybitService] Bybit markets loaded ✅")
+            # Normalize symbol: 'BTC/USDT' -> 'BTCUSDT'
+            category = 'linear'
+            clean_symbol = symbol.replace("/", "").upper()
 
-            # Symbol correction if needed
-            if symbol not in self.exchange.markets:
-                alt = symbol.replace("/", "")
-                for m in self.exchange.markets:
-                    if alt == m.replace("/", ""):
-                        symbol = m
-                        break
+            interval = TIMEFRAME_MAP.get(timeframe, '5')
 
-            logger.info(f"[BybitService] Fetching OHLCV: {symbol} {timeframe}")
-            ohlcv = await self.exchange.fetch_ohlcv(
-                symbol,
-                timeframe=timeframe,
-                limit=limit
-            )
+            url = f"{self.base_url}/v5/market/kline"
+            params = {
+                'category': category,
+                'symbol': clean_symbol,
+                'interval': interval,
+                'limit': limit
+            }
 
-            if not ohlcv:
-                logger.warning(f"[BybitService] Empty data received for {symbol} ❌")
+            logger.info(f"[BybitService] Fetching {clean_symbol} {timeframe} from {self.base_url}...")
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, proxy=self.proxy, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    data = await resp.json()
+
+            ret_code = data.get('retCode', -1)
+            if ret_code != 0:
+                logger.error(f"[BybitService] Bybit API error: {data.get('retMsg')} (code {ret_code})")
                 return None
 
-            logger.info(f"[BybitService] Got {len(ohlcv)} candles for {symbol} ✅")
-            df = pd.DataFrame(ohlcv, columns=[
-                'timestamp', 'open', 'high', 'low', 'close', 'volume'
-            ])
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            raw_list = data.get('result', {}).get('list', [])
+            if not raw_list:
+                logger.warning(f"[BybitService] Empty candle data for {clean_symbol}")
+                return None
 
+            # Bybit returns newest-first, so we reverse to get oldest-first
+            raw_list = list(reversed(raw_list))
+
+            df = pd.DataFrame(raw_list, columns=[
+                'timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'
+            ])
+            df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
+            df['timestamp'] = pd.to_datetime(df['timestamp'].astype('int64'), unit='ms')
+            df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
+
+            logger.info(f"[BybitService] ✅ Got {len(df)} candles for {clean_symbol}")
             return df
 
         except Exception as e:
             logger.error(f"[BybitService] ❌ Fetch error for {symbol}: {type(e).__name__}: {e}")
             return None
-

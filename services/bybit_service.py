@@ -10,7 +10,17 @@ class BybitService:
         config = {
             'enableRateLimit': True,
             'options': {
-                'defaultType': 'linear'
+                'defaultType': 'linear',
+                # Use alternative domain to bypass geo-blocking (CloudFront 403)
+                'urls': {
+                    'api': {
+                        'public': 'https://api.bytick.com',
+                        'private': 'https://api.bytick.com',
+                    }
+                }
+            },
+            'headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
         }
         
@@ -23,12 +33,12 @@ class BybitService:
             }
             logger.info(f"[BybitService] ✅ Proxy DETECTED: {proxy_url[:30]}...")
         else:
-            logger.warning("[BybitService] ⚠️ No PROXY_URL found in environment. Connecting directly to Bybit.")
+            logger.warning("[BybitService] ⚠️ No PROXY_URL found. Using alternative domain (api.bytick.com).")
 
         self.exchange = ccxt.bybit(config)
-        # Set sandbox mode to False for production
         self.exchange.set_sandbox_mode(False)
         self.markets_loaded = False
+
 
     async def fetch_ohlcv(self, symbol, timeframe='1m', limit=100):
         try:

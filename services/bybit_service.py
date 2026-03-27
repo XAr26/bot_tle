@@ -11,13 +11,6 @@ class BybitService:
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'linear',
-                # Use alternative domain to bypass geo-blocking (CloudFront 403)
-                'urls': {
-                    'api': {
-                        'public': 'https://api.bytick.com',
-                        'private': 'https://api.bytick.com',
-                    }
-                }
             },
             'headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -36,6 +29,12 @@ class BybitService:
             logger.warning("[BybitService] ⚠️ No PROXY_URL found. Using alternative domain (api.bytick.com).")
 
         self.exchange = ccxt.bybit(config)
+        
+        # Override Bybit URL directly on the exchange object to bypass geo-blocking
+        # api.bytick.com is an alternative Bybit domain not blocked by CloudFront
+        self.exchange.urls['api'] = 'https://api.bytick.com'
+        logger.info(f"[BybitService] API URL set to: {self.exchange.urls['api']}")
+        
         self.exchange.set_sandbox_mode(False)
         self.markets_loaded = False
 

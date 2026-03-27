@@ -14,7 +14,9 @@ from handlers.command_handlers import (
     price_handler,
     auto_on_handler,
     auto_off_handler,
-    chat_handler
+    chat_handler,
+    market_handler,
+    top_handler,
 )
 from utils.logger import setup_logger
 
@@ -47,6 +49,8 @@ def main():
         app.add_handler(CommandHandler("auto", auto_on_handler))  # default
         app.add_handler(CommandHandler("auto_on", auto_on_handler))
         app.add_handler(CommandHandler("auto_off", auto_off_handler))
+        app.add_handler(CommandHandler("market", market_handler))
+        app.add_handler(CommandHandler("top", top_handler))
         app.add_handler(CallbackQueryHandler(button_handler))
         
         # Add handler for normal messages

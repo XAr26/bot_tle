@@ -21,7 +21,9 @@ class BybitService:
                 'http': proxy_url,
                 'https': proxy_url
             }
-            logger.info("Using Proxy for Bybit connection.")
+            logger.info(f"[BybitService] ✅ Proxy DETECTED: {proxy_url[:30]}...")
+        else:
+            logger.warning("[BybitService] ⚠️ No PROXY_URL found in environment. Connecting directly to Bybit.")
 
         self.exchange = ccxt.bybit(config)
         # Set sandbox mode to False for production
@@ -32,12 +34,12 @@ class BybitService:
         try:
             # Load markets once
             if not self.markets_loaded:
+                logger.info(f"[BybitService] Loading markets for {symbol}...")
                 await self.exchange.load_markets()
                 self.markets_loaded = True
-                logger.info("Bybit markets loaded ✅")
+                logger.info("[BybitService] Bybit markets loaded ✅")
 
             # Symbol correction if needed
-            # Bybit usually uses 'BTC/USDT' or 'BTCUSDT' (spot)
             if symbol not in self.exchange.markets:
                 alt = symbol.replace("/", "")
                 for m in self.exchange.markets:
@@ -45,6 +47,7 @@ class BybitService:
                         symbol = m
                         break
 
+            logger.info(f"[BybitService] Fetching OHLCV: {symbol} {timeframe}")
             ohlcv = await self.exchange.fetch_ohlcv(
                 symbol,
                 timeframe=timeframe,
@@ -52,9 +55,10 @@ class BybitService:
             )
 
             if not ohlcv:
-                logger.warning(f"Empty data received for {symbol} on Bybit ❌")
+                logger.warning(f"[BybitService] Empty data received for {symbol} ❌")
                 return None
 
+            logger.info(f"[BybitService] Got {len(ohlcv)} candles for {symbol} ✅")
             df = pd.DataFrame(ohlcv, columns=[
                 'timestamp', 'open', 'high', 'low', 'close', 'volume'
             ])
@@ -63,5 +67,6 @@ class BybitService:
             return df
 
         except Exception as e:
-            logger.error(f"Bybit fetch error for {symbol}: {e}")
+            logger.error(f"[BybitService] ❌ Fetch error for {symbol}: {type(e).__name__}: {e}")
             return None
+

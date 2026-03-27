@@ -198,3 +198,15 @@ async def signal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(e)
         await update.effective_message.reply_text(f"❌ ERROR: {e}")
+
+# ================= CHAT =================
+async def chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.effective_message.text
+    
+    reply = (
+        f"Halo! Saya menerima pesan Anda: _{text}_\n\n"
+        "Saat ini saya diatur menggunakan perintah. Ketik /help untuk melihat fitur saya.\n"
+        "*(Jika maksud Anda menambahkan fitur Chart/Grafik harga, beri tahu saya agar bisa saya buatkan!)*"
+    )
+    
+    await update.effective_message.reply_text(reply, parse_mode='Markdown')

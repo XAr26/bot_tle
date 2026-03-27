@@ -5,7 +5,7 @@ load_dotenv(override=True)
 
 from telegram.ext import ApplicationBuilder, CommandHandler
 from config.config import Config
-from telegram.ext import CallbackQueryHandler
+from telegram.ext import CallbackQueryHandler, MessageHandler, filters
 from handlers.command_handlers import button_handler
 from handlers.command_handlers import (
     start_handler,
@@ -13,7 +13,8 @@ from handlers.command_handlers import (
     help_handler,
     price_handler,
     auto_on_handler,
-    auto_off_handler
+    auto_off_handler,
+    chat_handler
 )
 from utils.logger import setup_logger
 
@@ -47,6 +48,9 @@ def main():
         app.add_handler(CommandHandler("auto_on", auto_on_handler))
         app.add_handler(CommandHandler("auto_off", auto_off_handler))
         app.add_handler(CallbackQueryHandler(button_handler))
+        
+        # Add handler for normal messages
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_handler))
 
         logger.info("Bot starting up...")
         print("BOT IS RUNNING... Press Ctrl+C to stop.")

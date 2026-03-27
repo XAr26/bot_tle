@@ -5,3 +5,5 @@ ta
 apscheduler
 python-dotenv
 matplotlib
+aiohttp
+aiodns

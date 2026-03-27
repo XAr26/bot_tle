@@ -1,17 +1,29 @@
 import ccxt.async_support as ccxt
 import pandas as pd
 from utils.logger import setup_logger
+import os
 
 logger = setup_logger()
 
 class BybitService:
     def __init__(self):
-        self.exchange = ccxt.bybit({
+        config = {
             'enableRateLimit': True,
             'options': {
                 'defaultType': 'linear'
             }
-        })
+        }
+        
+        # Check if proxy is set in environment (for Railway/US servers)
+        proxy_url = os.getenv("PROXY_URL")
+        if proxy_url:
+            config['proxies'] = {
+                'http': proxy_url,
+                'https': proxy_url
+            }
+            logger.info("Using Proxy for Bybit connection.")
+
+        self.exchange = ccxt.bybit(config)
         # Set sandbox mode to False for production
         self.exchange.set_sandbox_mode(False)
         self.markets_loaded = False
